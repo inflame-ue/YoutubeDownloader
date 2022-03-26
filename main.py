@@ -126,7 +126,7 @@ class GUI:
             messagebox.showerror("Video Unavailable", message="This video is unavailable.")
 
         # tell the user that download is successful
-        messagebox.showinfo("Download Successfull", message="Video was downloaded successfully!")
+        messagebox.showinfo("Download Successful", message="Video was downloaded successfully!")
 
 
 if __name__ == "__main__":
