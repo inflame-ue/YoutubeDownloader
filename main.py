@@ -8,6 +8,7 @@ from tkinter import messagebox
 from PIL import ImageTk, Image
 import concurrent.futures
 import pytube
+import pytube.exceptions
 import os
 
 
@@ -15,7 +16,7 @@ import os
 class Logic:
     """This class implements logic for downloading videos from https://www.youtube.com"""
 
-    def __init__(self, video_url: str, save_path="C://Downloads"):
+    def __init__(self, video_url: str, save_path="C://Users//Ilya//Downloads"):
         """
         Init the logic of the application
         :param video_url: url of the video that you want to download
@@ -29,7 +30,7 @@ class Logic:
         This method downloads video from https://youtube.com using pytube library.
         :return: None
         """
-        # create a pytube.Youtube instance
+        # create a pytube.YouTube instance
         youtube_object = pytube.YouTube(self.video_url)
 
         # get the quality and the format of the video
@@ -38,7 +39,7 @@ class Logic:
 
         # check if the save path exists
         if not os.path.exists(self.save_path):
-            os.mkdir(self.save_path)
+            os.makedirs(self.save_path)
 
         # download the video
         youtube_object.download(self.save_path)
@@ -94,12 +95,9 @@ class GUI:
         self.save_path_entry = ttk.Entry(self.mainframe, width=40, style="Entries.TEntry", font=font_for_entries)
         self.save_path_entry.grid(column=2, row=2, padx=10, pady=10, columnspan=2)
 
-        # inherit from the parent class
-        logic = Logic(str(self.url_entry.get()), str(self.save_path_entry.get()))
-
         # buttons
         self.download_button = ttk.Button(self.mainframe, text="Download", style="Buttons.TButton", padding=5,
-                                          command=logic.download_video)
+                                          command=self.download)
         self.download_button.grid(column=1, row=3, padx=10, pady=10, sticky=E)
 
         self.close_button = ttk.Button(self.mainframe, text="Close", style="Buttons.TButton",
@@ -108,6 +106,27 @@ class GUI:
 
         # mainloop
         self.root.mainloop()
+
+    def download(self):
+        """
+        This function downloads video when the button is pressed.
+        :return: None
+        """
+        # create an instance of Logic class
+        logic = Logic(str(self.url_entry.get()), str(self.save_path_entry.get()))
+
+        # catch exceptions
+        try:
+            logic.download_video()
+        except pytube.exceptions.RegexMatchError:
+            messagebox.showerror("Regex Error", message="The Regex pattern did not return any matches for the video.")
+        except pytube.exceptions.ExtractError:
+            messagebox.showerror("Extract Error", message="An extraction error occurred.")
+        except pytube.exceptions.VideoUnavailable:
+            messagebox.showerror("Video Unavailable", message="This video is unavailable.")
+
+        # tell the user that download is successful
+        messagebox.showinfo("Download Successfull", message="Video was downloaded successfully!")
 
 
 if __name__ == "__main__":
